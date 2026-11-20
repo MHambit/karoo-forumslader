@@ -36,15 +36,15 @@ git remote set-url --push upstream DISABLED
 
 ---
 
-## 3. Sync `main` with Upstream
+## 3. Sync `main` and Tags with Upstream
 
-Run this before starting new work or after upstream merges one of your PRs:
+Run this before starting new work or after upstream merges one of your PRs (including `--tags` ensures your `develop` version tracks the latest upstream release tag):
 
 ```bash
-git fetch upstream
+git fetch upstream --tags
 git checkout main
 git merge --ff-only upstream/main
-git push origin main
+git push origin main --tags
 ```
 
 ---
@@ -98,11 +98,12 @@ git commit --no-edit
 and continue merging the remaining branches.
 
 ### What happens automatically on push to `develop`
-`.github/workflows/develop-release.yml` runs automatically (and can also be triggered manually via **Actions → Develop Release (Fork) → Run workflow**):
-1. Runs `./gradlew :app:testDebugUnitTest` (does not push coverage-baseline commits back to `develop`).
-2. Computes a non-colliding prerelease tag: `v<latest-upstream-tag>-dev.<run_number>` (e.g., `v1.12.0-dev.42`).
-3. Builds a signed release APK named `karoo-forumslader-<dev_tag>.apk`.
-4. Publishes a GitHub **Pre-release** on your fork with the APK attached for sideloading onto Karoo.
+`.github/workflows/develop-release.yml` mirrors the production release pipeline for `develop` (and can also be triggered manually via **Actions → Develop Release (Fork) → Run workflow**):
+1. Runs `./gradlew :app:checkCoverageBaseline` (same test + coverage gate as production, without pushing bot commits back to `develop`).
+2. Computes the next SemVer version from commits since the latest upstream `v*` tag and appends `-dev.<run_number>` (e.g., `v1.12.1-dev.42`).
+3. Builds a signed release APK named `karoo-forumslader-<new_tag>.apk`.
+4. Generates production-style release notes via `.github/scripts/generate_release_notes.kts`.
+5. Publishes a full GitHub Release (`Release v<major>.<minor>.<patch>-dev.<run_number>`) on your fork with the APK attached for sideloading onto Karoo.
 
 ---
 
@@ -111,11 +112,11 @@ and continue merging the remaining branches.
 Once upstream merges a PR (for example, `fix/fl6-standby-deadband`):
 
 ```bash
-# 1. Sync main (now contains the squash-merged fix)
-git fetch upstream
+# 1. Sync main and tags (now contains the squash-merged fix)
+git fetch upstream --tags
 git checkout main
 git merge --ff-only upstream/main
-git push origin main
+git push origin main --tags
 
 # 2. Delete the merged PR branch locally and on your fork
 git branch -D fix/fl6-standby-deadband
