@@ -1,49 +1,31 @@
 # Karoo Forumslader Extension Roadmap
 
-This document outlines the planned improvements and missing functionalities for the Karoo Forumslader Extension, compared against the Garmin Connect IQ reference companion project (`ref-companion`).
+This document tracks the remaining high-priority improvements for the Karoo Forumslader Extension. All original Garmin `ref-companion` parity items (16 data fields, BLE device lock, companion settings, safety alerts, FIT recording, CSV/Wi-Fi log export, climb-aware range estimation, and V6 wireless DFU) are implemented.
+
+See [GLOSSARY.md](../GLOSSARY.md) for canonical domain terminology.
 
 ---
 
-## 1. Feature Parity Gaps (Garmin `ref-companion` vs. Karoo Extension)
+## Recently Completed
 
-### Telemetry & Data Fields
-* **Unexposed Existing Fields**: `batteryVoltage`, `batteryCurrent`, and `temperatureCelsius` are parsed but not registered as Karoo custom data types or adapter fields.
-* **Unparsed/Unexposed Fields**:
-  * **Trip & Tour Energy (Wh)**: Derived from the `$FLC` sentence (set 3), indicating generator/consumer energy.
-  * **Generator Gear**: Coupled dynamo state/stage (1-10) from the `$FL5`/`$FL6` sentences.
-  * **Dynamo Power (W)**: Calculated generator power.
-  * **Odometer vs. Tour Distance**: Garmin distinguishes between odometer, tour distance, and day distance; Karoo currently only exposes a single trip distance.
-  * **Charge State**: Status indicator showing Standby, Charging, Discharging, or Full.
-
-### BLE Connection Stability & Diagnostics
-* **Diagnostics**: Garmin displays a diagnostic field with Stability Index (disconnects/hour), Data Quality (checksum check), and Disconnect count. Karoo does not track these.
-* **Device Lock**: Garmin stores the MAC address of the device to perform direct connection on boot. Karoo relies on scanning every time.
+- **Dynamic Battery Capacity & Health (`$FLC,5`)**: Parse BMS-measured full-charge capacity (`fullChargeCapacityMah`, `450..6000 mAh`) and `cycleCount`, persist last valid capacity per locked device, feed dynamic pack capacity (`Wh`) into `BatteryEstimator` (`ConsumerLoadModel` and `RouteEnergyForecaster`), and display pack capacity & cycles in the companion Dashboard.
 
 ---
 
-## 2. Platform-Specific Enhancements (Independent of Garmin)
+## Upcoming Priorities
 
-* **Companion App Settings UI**: Jetpack Compose screen in `MainScreen` allowing:
-  * Wheel size and dynamo pole count overrides (so speed/distance can compute instantly without waiting for `$FLP` packets).
-  * Lock MAC address selection.
-* **System Notifications**: Native Karoo alerts on critical errors (Low battery, high temperature, system interrupt, short circuit).
-* **Power-Safe BLE Loop**: Automatically pause scans/connections when the user pauses their ride or the computer suspends.
+### 1. Idempotent USB/Consumer Control & 12V Light Detection Reconciliation
+- Parse `FL_PROGCONSUMER` (`tokens[10]` in `$FL5`/`$FL6`) so the app knows whether consumer output is currently enabled.
+- Make `SetConsumerState(enabled)` idempotent instead of blindly sending toggle command `$FLT,2`.
+- Reconcile the `consumerCurrent` modeling contradiction between `ConsumerLoadModel` (12V battery bus draw) and `LightLoadDetector` (5V USB rail heuristic).
 
----
+### 2. Power-Safe BLE Lifecycle & BLE Diagnostics
+- **Power-Safe BLE Loop**: Automatically pause BLE scanning and reconnect loops when the ride is idle/paused or the Karoo suspends, conserving both Karoo and Forumslader battery.
+- **BLE Diagnostics**: Track connection stability metrics (disconnects/hour, checksum data quality, disconnect count) and surface them in the companion Diagnostics view (and optionally as a diagnostic data field).
 
-## 3. Prioritized Implementation Roadmap
-
-### Phase 1: Telemetry & Connection Parity (High Importance)
-1. **Expose Existing Parsed Telemetry**: Add `batteryVoltage`, `batteryCurrent`, and `temperatureCelsius` as custom data types to [ForumsladerExtension](file:///../../app/src/main/kotlin/org/happycode/karoo/forumslader/extension/ForumsladerExtension.kt).
-2. **Parse and Expose Remaining Metrics**: Support Generator Gear, Charging State, Trip/Tour Energy, and Odometer.
-3. **Implement Device Lock**: Save the connected MAC address in `SharedPreferences` to skip scan cycles.
-
-### Phase 2: Configuration & Diagnostics (Medium Importance)
-4. **Companion App Settings Panel**: Add Compose settings fields in [MainScreen](file:///../../app/src/main/kotlin/org/happycode/karoo/forumslader/screens/MainScreen.kt) to override wheel size/poles.
-5. **BLE Diagnostics Tracking**: Track connection stability metrics and display them in a diagnostic custom field.
-6. **System Alerts**: Implement popups for safety warnings (high temp, low batt) using the Karoo SDK notification API.
-
-### Phase 3: FIT Recording & Optimization (Low Importance)
-7. **FIT Activity Recording**: Write custom telemetry directly to the ride's activity FIT file.
-8. **CSV Logging & Export**: Support exporting local telemetry logs.
-9. **Comprehensive Integration Tests**: Expand Robolectric tests for BLE disconnect/reconnect loops.
+### 3. Telemetry & Codebase Hygiene
+- Disable `DEBUG_SENTENCE_PARSING = true` / 1 Hz `Log.i` spam in `ForumsladerParser`.
+- Align `PreferencesConstants.DEFAULT_HIGH_TEMP_THRESHOLD` (`40°C`) with `ForumsladerKarooAdapter` / `README.md` (`50°C`).
+- Clarify or deduplicate `tripDistanceMeters` vs. `odometerMeters` in `ForumsladerParser`.
+- Fix the `README.md` DFU command typo (`$FLT,6` → `$FLT,99`).
+- Decompose God objects (`ForumsladerKarooAdapter`, `MainScreen`) and align `model/` & `extension/` packages with the 4-ring onion architecture.
