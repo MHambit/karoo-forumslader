@@ -19,7 +19,8 @@ class BatteryEstimator(
     initialDischargeRate: Float? = DEFAULT_DISCHARGE_RATE,
     dischargeRateStore: DischargeRateStore = DischargeRateStore {},
     batteryCapacityWh: Float = DEFAULT_BATTERY_CAPACITY_WH,
-    dynamoPowerCurve: DynamoPowerCurve = DynamoPowerCurve()
+    dynamoPowerCurve: DynamoPowerCurve = DynamoPowerCurve(),
+    initialFullChargeCapacityMah: Int? = null
 ) {
     private val dischargeWindow = DischargeWindow(
         windowMeters = windowMeters,
@@ -46,6 +47,9 @@ class BatteryEstimator(
 
     private var lastBatteryLevelPct: Int? = null
     private var lastChargeState: ChargeState? = null
+    private var fullChargeCapacityMah: Int? = initialFullChargeCapacityMah?.takeIf { isCredibleCapacityMah(it) }
+    private var activeBatteryCapacityWh: Float = capacityWhFromMah(fullChargeCapacityMah) ?: batteryCapacityWh
+    private var cycleCount: Int? = null
     private var routeRemainingKm: Float? = null
     private var upcomingElevationMeters: Double? = null
     private var headwindSpeedMs: Float? = null
@@ -64,6 +68,7 @@ class BatteryEstimator(
     }
 
     fun onMetrics(metrics: ForumsladerMetrics) {
+        updatePackHealth(metrics.power)
         val currentLevel = metrics.power.batteryLevelPercentage ?: return
         val currentState = metrics.power.chargeState
 
@@ -79,6 +84,16 @@ class BatteryEstimator(
             consumerPowerWatts = currentConsumerPowerWatts,
             headwindSpeedMs = headwindSpeedMs
         )
+    }
+
+    private fun updatePackHealth(power: ForumsladerMetrics.Power) {
+        power.fullChargeCapacityMah?.takeIf { isCredibleCapacityMah(it) }?.let { capacityMah ->
+            fullChargeCapacityMah = capacityMah
+            activeBatteryCapacityWh = (capacityMah / MILLIAMPS_PER_AMP) * NOMINAL_PACK_VOLTAGE
+        }
+        power.cycleCount?.takeIf { it >= 0 }?.let { cycles ->
+            cycleCount = cycles
+        }
     }
 
     fun onRouteRemaining(distanceMeters: Double?, upcomingElevation: Double?) {
@@ -100,7 +115,8 @@ class BatteryEstimator(
             upcomingClimbs = upcomingClimbs,
             riderProfiles = riderProfiles,
             currentConsumerPowerWatts = currentConsumerPowerWatts,
-            headwindSpeedMs = headwindSpeedMs
+            headwindSpeedMs = headwindSpeedMs,
+            batteryCapacityWh = activeBatteryCapacityWh
         )
         val effectiveRate = calculateEffectiveRate(
             baseRate = dischargeWindow.lastDischargeRate,
@@ -129,7 +145,10 @@ class BatteryEstimator(
             estimatedRangeKm = estimatedRangeKm,
             routeRemainingKm = routeRemainingKm,
             isSufficientForRoute = isSufficientForRoute,
-            chargeState = currentState
+            chargeState = currentState,
+            batteryCapacityWh = activeBatteryCapacityWh,
+            fullChargeCapacityMah = fullChargeCapacityMah,
+            cycleCount = cycleCount
         )
     }
 
@@ -144,7 +163,8 @@ class BatteryEstimator(
                 currentPowerWatts = currentConsumerPowerWatts,
                 baselinePowerWatts = dischargeWindow.baselineConsumerPowerWatts,
                 speedMetersPerSecond = lastSpeedMetersPerSecond,
-                baseRatePctPerKm = rate
+                baseRatePctPerKm = rate,
+                batteryCapacityWh = activeBatteryCapacityWh
             )
             (rate + headwindPenalty + consumerDelta).coerceIn(minCredibleDischargeRate, maxCredibleDischargeRate)
         }
@@ -154,8 +174,18 @@ class BatteryEstimator(
         const val MIN_CREDIBLE_DISCHARGE_RATE = 0.15f
         const val MAX_CREDIBLE_DISCHARGE_RATE = 5.0f
         const val DEFAULT_BATTERY_CAPACITY_WH = 13.3f
+        const val MIN_CREDIBLE_CAPACITY_MAH = 450
+        const val MAX_CREDIBLE_CAPACITY_MAH = 6000
+        const val NOMINAL_PACK_VOLTAGE = 11.1f
+        private const val MILLIAMPS_PER_AMP = 1000f
         private const val EMA_ALPHA = 0.35f
         const val MAX_STEP_METERS = 1_000.0
         private const val METERS_PER_KM = 1000.0
+
+        fun isCredibleCapacityMah(capacityMah: Int): Boolean =
+            capacityMah in MIN_CREDIBLE_CAPACITY_MAH..MAX_CREDIBLE_CAPACITY_MAH
+
+        fun capacityWhFromMah(capacityMah: Int?): Float? =
+            capacityMah?.takeIf { isCredibleCapacityMah(it) }?.let { (it / MILLIAMPS_PER_AMP) * NOMINAL_PACK_VOLTAGE }
     }
 }

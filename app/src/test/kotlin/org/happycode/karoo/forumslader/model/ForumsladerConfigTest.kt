@@ -40,6 +40,7 @@ class ForumsladerConfigTest : ShouldSpec({
             poles shouldBe 14
             version shouldBe ForumsladerVersion.Unknown
             lockedMacAddress shouldBe null
+            fullChargeCapacityMah shouldBe null
         }
     }
 
@@ -89,5 +90,22 @@ class ForumsladerConfigTest : ShouldSpec({
 
         // then
         ForumsladerConfig(context).lockedMacAddress shouldBe newValue
+    }
+
+    should("persist and clear fullChargeCapacityMah when updated") {
+        // given
+        val config = ForumsladerConfig(context)
+
+        // when
+        config.fullChargeCapacityMah = 3000
+
+        // then
+        ForumsladerConfig(context).fullChargeCapacityMah shouldBe 3000
+
+        // when
+        config.fullChargeCapacityMah = null
+
+        // then
+        ForumsladerConfig(context).fullChargeCapacityMah shouldBe null
     }
 })
