@@ -33,19 +33,56 @@ jobs:
         with:
           packages: 'platform-tools'
 
-      - name: Run unit tests
+      - name: Run tests and verify coverage
         env:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :app:testDebugUnitTest
+        run: ./gradlew :app:checkCoverageBaseline
 
-      - name: Compute develop prerelease tag
+      - name: Compute dev release version
         run: |
-          base_tag=$(git tag -l "v*" --sort=-v:refname | grep -v -- "-dev\." | head -n 1 || true)
-          base_tag=${base_tag:-v0.0.0}
-          dev_tag="${base_tag}-dev.${GITHUB_RUN_NUMBER}"
-          echo "dev_tag=${dev_tag}" >> "$GITHUB_ENV"
-          echo "Release tag: ${dev_tag}"
+          git fetch --tags origin
+          prev_tag=$(git tag -l "v*" --sort=-v:refname | grep -v -- "-dev\." | head -n 1 || true)
+          prev_tag=${prev_tag:-v0.0.0}
+          echo "prev_tag=${prev_tag}" >> "$GITHUB_ENV"
+
+          version=${prev_tag#v}
+          version=${version%%-*}
+          version=${version%%+*}
+
+          IFS='.' read -r major minor patch <<< "$version" || true
+          major=$(echo "${major:-0}" | grep -oE '^[0-9]+' || echo "0")
+          minor=$(echo "${minor:-0}" | grep -oE '^[0-9]+' || echo "0")
+          patch=$(echo "${patch:-0}" | grep -oE '^[0-9]+' || echo "0")
+
+          major=$((10#$major))
+          minor=$((10#$minor))
+          patch=$((10#$patch))
+
+          if [ "$prev_tag" = "v0.0.0" ]; then
+            log_range="HEAD"
+          else
+            log_range="${prev_tag}..HEAD"
+          fi
+
+          subjects=$(git log "$log_range" --pretty=%s)
+          bodies=$(git log "$log_range" --pretty=%b)
+
+          if echo "$subjects" | grep -qE '^(feat|fix|refactor)(\(.*\))?!:|\[BREAKING\]' || echo "$bodies" | grep -qE '^BREAKING[- ]CHANGE:'; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+          elif echo "$subjects" | grep -qE '^(feat|refactor)(\(.*\))?:'; then
+            minor=$((minor + 1))
+            patch=0
+          elif echo "$subjects" | grep -qE '^fix(\(.*\))?:'; then
+            patch=$((patch + 1))
+          fi
+
+          new_tag="v${major}.${minor}.${patch}-dev.${GITHUB_RUN_NUMBER}"
+          echo "new_tag=${new_tag}" >> "$GITHUB_ENV"
+          echo "Previous upstream tag: ${prev_tag}"
+          echo "New dev version: ${new_tag}"
 
       - name: Decode Keystore
         env:
@@ -54,7 +91,7 @@ jobs:
           mkdir -p ~/.keystore
           echo "$KEYSTORE_BASE64" | base64 -d > ~/.keystore/upload-keystore.jks
 
-      - name: Build release APK
+      - name: Build productive release APK
         env:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,18 +99,21 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ./gradlew :app:assembleRelease -PversionName=${{ env.dev_tag }} -PversionCode=${{ github.run_number }}
-          cp app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/karoo-forumslader-${{ env.dev_tag }}.apk"
+          ./gradlew :app:assembleRelease -PversionName=${{ env.new_tag }} -PversionCode=${{ github.run_number }}
+          cp app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/karoo-forumslader-${{ env.new_tag }}.apk"
 
-      - name: Create GitHub Pre-release
+      - name: Generate Release Notes
+        run: kotlinc -script .github/scripts/generate_release_notes.kts
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ env.dev_tag }}
+          tag_name: ${{ env.new_tag }}
           target_commitish: ${{ github.sha }}
-          name: Develop ${{ env.dev_tag }}
-          generate_release_notes: true
+          name: Release ${{ env.new_tag }}
+          body_path: release_notes.md
           draft: false
-          prerelease: true
-          files: app/build/outputs/apk/release/karoo-forumslader-${{ env.dev_tag }}.apk
+          prerelease: false
+          files: app/build/outputs/apk/release/karoo-forumslader-${{ env.new_tag }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
