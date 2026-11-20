@@ -131,7 +131,8 @@ class ForumsladerKarooAdapter(
     private val prefsStore = SharedPrefsDischargeRateStore(sharedPrefs)
     private val batteryEstimator = batteryEstimator ?: BatteryEstimator(
         initialDischargeRate = prefsStore.loadInitialRate(),
-        dischargeRateStore = prefsStore
+        dischargeRateStore = prefsStore,
+        initialFullChargeCapacityMah = config.fullChargeCapacityMah
     )
     private val profileRepository: RiderProfileRepository = riderProfileRepository
         ?: RoomRiderProfileRepository(ForumsladerDatabase.getInstance(context).riderProfileDao())

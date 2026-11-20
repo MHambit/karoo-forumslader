@@ -3,6 +3,7 @@ package org.happycode.karoo.forumslader.model
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import org.happycode.karoo.forumslader.PreferencesConstants.KEY_FULL_CHARGE_CAPACITY_MAH
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_LOCKED_MAC_ADDRESS
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_POLES
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_VERSION
@@ -27,4 +28,10 @@ class ForumsladerConfig(context: Context) {
     var lockedMacAddress: String?
         get() = prefs.getString(KEY_LOCKED_MAC_ADDRESS, null)
         set(value) = prefs.edit { putString(KEY_LOCKED_MAC_ADDRESS, value) }
+
+    var fullChargeCapacityMah: Int?
+        get() = prefs.getInt(KEY_FULL_CHARGE_CAPACITY_MAH, -1).takeIf { it > 0 }
+        set(value) = prefs.edit {
+            value?.let { putInt(KEY_FULL_CHARGE_CAPACITY_MAH, it) } ?: remove(KEY_FULL_CHARGE_CAPACITY_MAH)
+        }
 }

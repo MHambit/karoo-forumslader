@@ -39,7 +39,8 @@ class RouteEnergyForecaster(
         upcomingClimbs: List<ClimbSegment>,
         riderProfiles: Map<Int, GradientProfile>,
         currentConsumerPowerWatts: Float,
-        headwindSpeedMs: Float?
+        headwindSpeedMs: Float?,
+        batteryCapacityWh: Float = this.batteryCapacityWh
     ): RouteEnergyForecast = when {
         upcomingClimbs.isNotEmpty() -> forecastWithClimbs(
             currentLevelPct,
@@ -47,7 +48,8 @@ class RouteEnergyForecaster(
             upcomingClimbs,
             riderProfiles,
             currentConsumerPowerWatts,
-            headwindSpeedMs
+            headwindSpeedMs,
+            batteryCapacityWh
         )
         else -> forecastFromElevation(
             routeRemainingKm,
@@ -61,7 +63,8 @@ class RouteEnergyForecaster(
         upcomingClimbs: List<ClimbSegment>,
         riderProfiles: Map<Int, GradientProfile>,
         currentConsumerPowerWatts: Float,
-        headwindSpeedMs: Float?
+        headwindSpeedMs: Float?,
+        batteryCapacityWh: Float
     ): RouteEnergyForecast {
         val totalClimbKm = (upcomingClimbs.sumOf { it.lengthMeters } / METERS_PER_KM).toFloat()
         val nonClimbFraction = resolveNonClimbFraction(routeRemainingKm, totalClimbKm)
@@ -74,10 +77,17 @@ class RouteEnergyForecaster(
                 upcomingClimbs,
                 riderProfiles,
                 currentConsumerPowerWatts,
-                headwindSpeedMs
+                headwindSpeedMs,
+                batteryCapacityWh
             )
             else -> upcomingClimbs.fold(0f) { acc, climb ->
-                acc + calculateClimbDrainPct(climb, riderProfiles, currentConsumerPowerWatts, headwindSpeedMs)
+                acc + calculateClimbDrainPct(
+                    climb,
+                    riderProfiles,
+                    currentConsumerPowerWatts,
+                    headwindSpeedMs,
+                    batteryCapacityWh
+                )
             } to totalClimbKm
         }
 
@@ -94,13 +104,15 @@ class RouteEnergyForecaster(
         upcomingClimbs: List<ClimbSegment>,
         riderProfiles: Map<Int, GradientProfile>,
         currentConsumerPowerWatts: Float,
-        headwindSpeedMs: Float?
+        headwindSpeedMs: Float?,
+        batteryCapacityWh: Float
     ): Pair<Float, Float> {
         val sortedClimbs = upcomingClimbs.sortedBy { it.startDistanceMeters }
         val recoveryPctPerKm = calculateFlatRecoveryPctPerKm(
             riderProfiles,
             currentConsumerPowerWatts,
-            headwindSpeedMs
+            headwindSpeedMs,
+            batteryCapacityWh
         )
 
         var simulatedLevelPct = currentLevelPct
@@ -126,7 +138,8 @@ class RouteEnergyForecaster(
                 climb,
                 riderProfiles,
                 currentConsumerPowerWatts,
-                headwindSpeedMs
+                headwindSpeedMs,
+                batteryCapacityWh
             )
             accumulatedClimbKm += (climb.lengthMeters / METERS_PER_KM).toFloat()
             simulatedLevelPct -= climbDrainPct
@@ -145,7 +158,8 @@ class RouteEnergyForecaster(
         climb: ClimbSegment,
         riderProfiles: Map<Int, GradientProfile>,
         currentConsumerPowerWatts: Float,
-        headwindSpeedMs: Float?
+        headwindSpeedMs: Float?,
+        batteryCapacityWh: Float
     ): Float {
         val bucket = GradientProfile.bucketFor(climb.gradientPct)
         val baseProfile = riderProfiles[bucket]
@@ -164,7 +178,8 @@ class RouteEnergyForecaster(
     private fun calculateFlatRecoveryPctPerKm(
         riderProfiles: Map<Int, GradientProfile>,
         currentConsumerPowerWatts: Float,
-        headwindSpeedMs: Float?
+        headwindSpeedMs: Float?,
+        batteryCapacityWh: Float
     ): Float {
         val baseFlat = riderProfiles[0] ?: GradientProfile.defaultFor(0)
         val effectiveFlat = headwindSpeedMs?.let { baseFlat.adjustedForHeadwind(it) } ?: baseFlat

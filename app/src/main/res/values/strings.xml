@@ -50,6 +50,9 @@
     <string name="battery_range_rate">%1$.1f%%/km</string>
     <string name="battery_range_sufficient">Sufficient for route</string>
     <string name="battery_range_insufficient">Battery may run out early</string>
+    <string name="battery_pack_capacity_with_cycles">%1$d mAh (%2$.1f Wh) · %3$d cycles</string>
+    <string name="battery_pack_capacity_measured">%1$d mAh (%2$.1f Wh)</string>
+    <string name="battery_pack_capacity_default">%1$.1f Wh (default)</string>
 
     <string name="card_title_overview">Overview</string>
     <string name="card_title_power">Power &amp; Dynamo</string>

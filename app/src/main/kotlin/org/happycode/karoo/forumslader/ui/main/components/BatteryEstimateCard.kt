@@ -165,4 +165,36 @@ private fun BatteryEstimateContent(estimate: BatteryEstimate) {
             )
         }
     }
+
+    BatteryPackHealthFooter(estimate = estimate)
+}
+
+@Composable
+private fun BatteryPackHealthFooter(estimate: BatteryEstimate) {
+    val capacityMah = estimate.fullChargeCapacityMah
+    val cycleCount = estimate.cycleCount
+    val summaryText = when {
+        capacityMah != null && cycleCount != null -> stringResource(
+            R.string.battery_pack_capacity_with_cycles,
+            capacityMah,
+            estimate.batteryCapacityWh,
+            cycleCount
+        )
+        capacityMah != null -> stringResource(
+            R.string.battery_pack_capacity_measured,
+            capacityMah,
+            estimate.batteryCapacityWh
+        )
+        else -> stringResource(
+            R.string.battery_pack_capacity_default,
+            estimate.batteryCapacityWh
+        )
+    }
+
+    Text(
+        text = summaryText,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 6.dp)
+    )
 }
