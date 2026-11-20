@@ -657,4 +657,61 @@ class ForumsladerParserTest : ShouldSpec({
         dischargingResult.power.chargeState shouldBe ChargeState.DISCHARGING
         standbyResult.power.chargeState shouldBe ChargeState.STANDBY
     }
+
+    should("parse fullChargeCapacityMah and cycleCount from FLC set 5 and persist capacity to config") {
+        // given
+        val mockConfig = mockk<ForumsladerConfig>(relaxed = true)
+        every { mockConfig.wheelsize } returns 2200
+        every { mockConfig.poles } returns 14
+        every { mockConfig.fullChargeCapacityMah } returns null
+        val customParser = ForumsladerParser(config = mockConfig)
+
+        val flcPayload = $$"$FLC,5,12,84,2600,37,150000"
+        val fl6Payload = $$"$FL6,0,4,100,4000,4000,4000,-150,200,0,0,0,100"
+
+        // when
+        customParser.processIncomingBytes(flcPayload.toFrameBytes())
+        val result = customParser.processIncomingBytes(fl6Payload.toFrameBytes()).shouldNotBeNull()
+
+        // then
+        result.power.batteryLevelPercentage shouldBe 84
+        result.power.fullChargeCapacityMah shouldBe 2600
+        result.power.cycleCount shouldBe 37
+        verify { mockConfig.fullChargeCapacityMah = 2600 }
+    }
+
+    should("ignore out-of-range fullChargeCapacityMah and negative cycleCount in FLC set 5") {
+        // given
+        val flcInvalidLow = $$"$FLC,5,12,80,0,-5,0"
+        val flcInvalidBelowMin = $$"$FLC,5,12,80,449,-1,0"
+        val flcInvalidAboveMax = $$"$FLC,5,12,80,6001,-1,0"
+        val fl6Payload = $$"$FL6,0,4,100,4000,4000,4000,-150,200,0,0,0,100"
+
+        // when
+        parser.processIncomingBytes(flcInvalidLow.toFrameBytes())
+        parser.processIncomingBytes(flcInvalidBelowMin.toFrameBytes())
+        parser.processIncomingBytes(flcInvalidAboveMax.toFrameBytes())
+        val result = parser.processIncomingBytes(fl6Payload.toFrameBytes()).shouldNotBeNull()
+
+        // then
+        result.power.batteryLevelPercentage shouldBe 80
+        result.power.fullChargeCapacityMah.shouldBeNull()
+        result.power.cycleCount.shouldBeNull()
+    }
+
+    should("load initial fullChargeCapacityMah from persisted config before FLC set 5 arrives") {
+        // given
+        val mockConfig = mockk<ForumsladerConfig>(relaxed = true)
+        every { mockConfig.wheelsize } returns 2200
+        every { mockConfig.poles } returns 14
+        every { mockConfig.fullChargeCapacityMah } returns 3200
+        val customParser = ForumsladerParser(config = mockConfig)
+        val fl6Payload = $$"$FL6,0,4,100,4000,4000,4000,-150,200,0,0,0,100"
+
+        // when
+        val result = customParser.processIncomingBytes(fl6Payload.toFrameBytes()).shouldNotBeNull()
+
+        // then
+        result.power.fullChargeCapacityMah shouldBe 3200
+    }
 })

@@ -8,5 +8,8 @@ data class BatteryEstimate(
     val estimatedRangeKm: Float?,
     val routeRemainingKm: Float?,
     val isSufficientForRoute: Boolean?,
-    val chargeState: ChargeState = ChargeState.DISCHARGING
+    val chargeState: ChargeState = ChargeState.DISCHARGING,
+    val batteryCapacityWh: Float = BatteryEstimator.DEFAULT_BATTERY_CAPACITY_WH,
+    val fullChargeCapacityMah: Int? = null,
+    val cycleCount: Int? = null
 )

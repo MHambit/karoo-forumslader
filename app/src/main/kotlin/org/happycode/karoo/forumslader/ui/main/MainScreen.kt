@@ -54,6 +54,7 @@ import org.happycode.karoo.forumslader.PreferencesConstants.DEFAULT_BATTERY_LOW_
 import org.happycode.karoo.forumslader.PreferencesConstants.DEFAULT_HIGH_TEMP_THRESHOLD
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_AUTO_DISABLE_USB_ON_LIGHT
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_BATTERY_LOW_THRESHOLD
+import org.happycode.karoo.forumslader.PreferencesConstants.KEY_FULL_CHARGE_CAPACITY_MAH
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_HIGH_TEMP_THRESHOLD
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_LOCKED_MAC_ADDRESS
 import org.happycode.karoo.forumslader.PreferencesConstants.KEY_POLES
@@ -296,7 +297,10 @@ fun MainScreen(sharedUri: Uri? = null) {
             CommandBus.sendCommand(ForumsladerCommand.UpdateConfig(ws, p))
         },
         onForgetDevice = {
-            prefs.edit { putString(KEY_LOCKED_MAC_ADDRESS, null) }
+            prefs.edit {
+                putString(KEY_LOCKED_MAC_ADDRESS, null)
+                remove(KEY_FULL_CHARGE_CAPACITY_MAH)
+            }
         },
         onBatteryLowThresholdChange = {
             prefs.edit { putInt(KEY_BATTERY_LOW_THRESHOLD, it) }

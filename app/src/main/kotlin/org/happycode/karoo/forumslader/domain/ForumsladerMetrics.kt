@@ -20,7 +20,9 @@ data class ForumsladerMetrics(
         val batteryLevelPercentage: Int?,
         val chargeState: ChargeState,
         val dynamoPowerWatts: Float,
-        val statusMask: Int
+        val statusMask: Int,
+        val fullChargeCapacityMah: Int? = null,
+        val cycleCount: Int? = null
     )
 
     /**

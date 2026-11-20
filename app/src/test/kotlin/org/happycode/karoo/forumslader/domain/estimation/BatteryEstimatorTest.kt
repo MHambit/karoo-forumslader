@@ -20,7 +20,9 @@ class BatteryEstimatorTest : ShouldSpec({
         batteryCurrent: Float = -0.5f,
         chargeState: ChargeState = ChargeState.DISCHARGING,
         consumerCurrent: Float = 0.5f,
-        speedMetersPerSecond: Float = 0f
+        speedMetersPerSecond: Float = 0f,
+        fullChargeCapacityMah: Int? = null,
+        cycleCount: Int? = null
     ) = ForumsladerMetrics(
         power = ForumsladerMetrics.Power(
             batteryVoltage = 12.0f,
@@ -29,7 +31,9 @@ class BatteryEstimatorTest : ShouldSpec({
             batteryLevelPercentage = batteryPct,
             chargeState = chargeState,
             dynamoPowerWatts = 0f,
-            statusMask = 0
+            statusMask = 0,
+            fullChargeCapacityMah = fullChargeCapacityMah,
+            cycleCount = cycleCount
         ),
         dynamics = ForumsladerMetrics.Dynamics(
             frequency = 0f,
@@ -1195,5 +1199,61 @@ class BatteryEstimatorTest : ShouldSpec({
         // then: fresh headwind increases rate over calm; wind already baked into discharge window is not double-counted
         newHeadwind.avgDischargeRatePctPerKm shouldBeGreaterThan calm.avgDischargeRatePctPerKm
         acclimatedHeadwind.avgDischargeRatePctPerKm shouldBe (calm.avgDischargeRatePctPerKm plusOrMinus 0.01f)
+    }
+
+    should("use persisted initialFullChargeCapacityMah on cold start and expose pack health on estimate") {
+        // given
+        val estimator = BatteryEstimator(initialFullChargeCapacityMah = 3000)
+
+        // when
+        estimator.onMetrics(createMetrics(distance = 0.0, batteryPct = 80, cycleCount = 42))
+        val estimate = estimator.getEstimate().shouldNotBeNull()
+
+        // then
+        estimate.fullChargeCapacityMah shouldBe 3000
+        estimate.batteryCapacityWh shouldBe (33.3f plusOrMinus 0.01f)
+        estimate.cycleCount shouldBe 42
+    }
+
+    should("fall back to default pack capacity when fullChargeCapacityMah is absent or out of credible bounds") {
+        // given
+        val estimator = BatteryEstimator(initialFullChargeCapacityMah = 200)
+
+        // when
+        estimator.onMetrics(createMetrics(distance = 0.0, batteryPct = 80, fullChargeCapacityMah = 9000))
+        val estimate = estimator.getEstimate().shouldNotBeNull()
+
+        // then
+        estimate.fullChargeCapacityMah.shouldBeNull()
+        estimate.batteryCapacityWh shouldBe BatteryEstimator.DEFAULT_BATTERY_CAPACITY_WH
+    }
+
+    should("update batteryCapacityWh dynamically without resetting discharge window and scale climb and consumer impacts") {
+        // given: same climb and consumer load delta on a default 1200 mAh pack vs a 3000 mAh touring pack
+        val climb = ClimbSegment(startDistanceMeters = 1_000.0, lengthMeters = 5_000.0, gradientPct = 8.0f)
+        val smallPackEstimator = BatteryEstimator(minMetersForEstimate = 500.0).apply {
+            onUpcomingClimbs(listOf(climb))
+            onRouteRemaining(distanceMeters = 10_000.0, upcomingElevation = null)
+            onMetrics(createMetrics(distance = 0.0, batteryPct = 80, consumerCurrent = 0.2f, speedMetersPerSecond = 5.0f))
+            onMetrics(createMetrics(distance = 1_000.0, batteryPct = 79, consumerCurrent = 0.2f, speedMetersPerSecond = 5.0f))
+            onMetrics(createMetrics(distance = 1_010.0, batteryPct = 79, consumerCurrent = 1.0f, speedMetersPerSecond = 5.0f, fullChargeCapacityMah = 1200))
+        }
+        val largePackEstimator = BatteryEstimator(minMetersForEstimate = 500.0).apply {
+            onUpcomingClimbs(listOf(climb))
+            onRouteRemaining(distanceMeters = 10_000.0, upcomingElevation = null)
+            onMetrics(createMetrics(distance = 0.0, batteryPct = 80, consumerCurrent = 0.2f, speedMetersPerSecond = 5.0f))
+            onMetrics(createMetrics(distance = 1_000.0, batteryPct = 79, consumerCurrent = 0.2f, speedMetersPerSecond = 5.0f))
+            onMetrics(createMetrics(distance = 1_010.0, batteryPct = 79, consumerCurrent = 1.0f, speedMetersPerSecond = 5.0f, fullChargeCapacityMah = 3000))
+        }
+
+        // when
+        val smallEstimate = smallPackEstimator.getEstimate().shouldNotBeNull()
+        val largeEstimate = largePackEstimator.getEstimate().shouldNotBeNull()
+
+        // then: larger pack suffers smaller %/km consumer load jump and longer projected range while keeping discharge window intact
+        largeEstimate.fullChargeCapacityMah shouldBe 3000
+        largeEstimate.batteryCapacityWh shouldBe (33.3f plusOrMinus 0.01f)
+        largeEstimate.avgDischargeRatePctPerKm shouldBeLessThan smallEstimate.avgDischargeRatePctPerKm
+        largeEstimate.estimatedRangeKm.shouldNotBeNull() shouldBeGreaterThan smallEstimate.estimatedRangeKm.shouldNotBeNull()
     }
 })

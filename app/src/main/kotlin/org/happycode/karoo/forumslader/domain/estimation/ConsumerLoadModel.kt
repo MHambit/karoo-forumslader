@@ -33,7 +33,8 @@ class ConsumerLoadModel(
         currentPowerWatts: Float,
         baselinePowerWatts: Float?,
         speedMetersPerSecond: Float?,
-        baseRatePctPerKm: Float
+        baseRatePctPerKm: Float,
+        batteryCapacityWh: Float = this.batteryCapacityWh
     ): Float {
         val baselineWatts = baselinePowerWatts ?: return 0f
         val powerDeltaWatts = currentPowerWatts - baselineWatts
