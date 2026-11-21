@@ -51,6 +51,12 @@ The extension features a custom graphical RemoteViews data field (`Battery & Ran
 | **Active Dynamo Charging**<br>*(75% battery, charging active)*  |    ![Standard Dynamo Charging](docs/images/data-fields/battery-range-standard-charging.png)     |    ![Compact Dynamo Charging](docs/images/data-fields/battery-range-compact-charging.png)     | **`⚡%` Charging Indicator**: Dynamo power exceeds consumer draw; battery is actively charging.                       |
 | **Low Battery Warning**<br>*(15% battery, below 20% threshold)* |     ![Standard Low Battery](docs/images/data-fields/battery-range-standard-low-battery.png)     |     ![Compact Low Battery](docs/images/data-fields/battery-range-compact-low-battery.png)     | **Red (`karoo_battery_low`)**: Battery percentage is at or below the configured safety alert threshold.               |
 
+#### Companion App — Battery & Range Card
+
+The companion app's dashboard displays a dedicated **Battery & Range** card with separate **Charge Level** (progress bar + color-coded percentage), **Estimated Range** (with live discharge rate), active route sufficiency status, and BMS pack health (measured capacity, Wh, and cycle count):
+
+<img src="docs/images/battery-range-card.png" alt="Companion App Battery & Range Card" width="240" />
+
 ### Supported Data Fields
 
 Add any of these 16 dedicated Forumslader data fields directly to your Karoo ride profiles:
