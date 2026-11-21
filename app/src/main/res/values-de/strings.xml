@@ -42,7 +42,9 @@
     <string name="percentage_character">%</string>
 
 
-    <string name="battery_range_estimate_title">Geschätzte Akkureichweite</string>
+    <string name="battery_range_estimate_title">Akku &amp; Reichweite</string>
+    <string name="battery_charge_level_label">Ladestand</string>
+    <string name="battery_estimated_range_label">Geschätzte Reichweite</string>
     <string name="battery_range_calculating">Berechne…</string>
     <string name="battery_range_standby">Standby</string>
     <string name="battery_range_charging">Ladevorgang — Reichweite unbegrenzt</string>

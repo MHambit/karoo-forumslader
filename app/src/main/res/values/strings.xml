@@ -41,7 +41,9 @@
     <string name="battery_range_calc_short">Calc…</string>
      <string name="percentage_character">%</string>
 
-    <string name="battery_range_estimate_title">Battery Range Estimate</string>
+    <string name="battery_range_estimate_title">Battery &amp; Range</string>
+    <string name="battery_charge_level_label">Charge Level</string>
+    <string name="battery_estimated_range_label">Estimated Range</string>
     <string name="battery_range_calculating">Calculating…</string>
     <string name="battery_range_standby">Standby</string>
     <string name="battery_range_charging">Charging — range unlimited</string>
