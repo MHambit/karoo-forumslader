@@ -1,5 +1,6 @@
 package org.happycode.karoo.forumslader.ui.main.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import org.happycode.karoo.forumslader.theme.forumsladerColors
 fun StatusCard(connected: Boolean, sensorState: StreamState) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
