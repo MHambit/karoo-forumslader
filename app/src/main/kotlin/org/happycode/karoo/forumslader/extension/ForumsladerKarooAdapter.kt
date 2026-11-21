@@ -236,36 +236,7 @@ class ForumsladerKarooAdapter(
                 }
             }
             launch {
-                bleManager.connectionState.collect { status ->
-                    Log.i(TAG, "Connection status changed for $address: $status")
-                    currentEmitter?.onNext(OnConnectionStatus(status = status))
-                    when (status) {
-                        ConnectionStatus.CONNECTED -> {
-                            wasConnected = true
-                            intentionalDisconnect = false
-                            BleDiagnosticsStore.onConnected()
-                        }
-                        ConnectionStatus.DISCONNECTED -> {
-                            if (wasConnected && !intentionalDisconnect) {
-                                BleDiagnosticsStore.onUnexpectedDisconnect()
-                            }
-                            wasConnected = false
-                            csvLogger.flush()
-                            recordRiderProfileUseCase.flush()
-                            protocol.stopParameterRequestLoop()
-                            parser.resetConfigLoaded()
-                            BatteryEstimateStore.clear()
-                            lightLoadDetector.reset()
-                            previousLightState = LightLoadState.IDLE
-                            autoDisabledUsbByLight = false
-                            currentGradientPct = null
-                            totalRouteDistanceMeters = null
-                            routeClimbs = emptyList()
-                            batteryEstimator.onUpcomingClimbs(emptyList())
-                        }
-                        else -> Unit
-                    }
-                }
+                bleManager.connectionState.collect(::handleConnectionStatus)
             }
             launch {
                 bleManager.versionDetected.collect { version ->
@@ -316,6 +287,37 @@ class ForumsladerKarooAdapter(
         }
         
         bleManager.start()
+    }
+
+    private suspend fun handleConnectionStatus(status: ConnectionStatus) {
+        Log.i(TAG, "Connection status changed for $address: $status")
+        currentEmitter?.onNext(OnConnectionStatus(status = status))
+        when (status) {
+            ConnectionStatus.CONNECTED -> {
+                wasConnected = true
+                intentionalDisconnect = false
+                BleDiagnosticsStore.onConnected()
+            }
+            ConnectionStatus.DISCONNECTED -> {
+                if (wasConnected && !intentionalDisconnect) {
+                    BleDiagnosticsStore.onUnexpectedDisconnect()
+                }
+                wasConnected = false
+                csvLogger.flush()
+                recordRiderProfileUseCase.flush()
+                protocol.stopParameterRequestLoop()
+                parser.resetConfigLoaded()
+                BatteryEstimateStore.clear()
+                lightLoadDetector.reset()
+                previousLightState = LightLoadState.IDLE
+                autoDisabledUsbByLight = false
+                currentGradientPct = null
+                totalRouteDistanceMeters = null
+                routeClimbs = emptyList()
+                batteryEstimator.onUpcomingClimbs(emptyList())
+            }
+            else -> Unit
+        }
     }
 
     internal fun handleDistanceRemaining(event: OnStreamState) {
