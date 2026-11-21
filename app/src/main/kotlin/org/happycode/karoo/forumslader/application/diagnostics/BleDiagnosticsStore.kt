@@ -44,8 +44,10 @@ class BleDiagnosticsTracker(
         }
     }
 
-    fun reset() {
-        _diagnosticsFlow.value = BleConnectionDiagnostics()
+    fun reset(isConnected: Boolean = false) {
+        _diagnosticsFlow.value = BleConnectionDiagnostics(
+            connectTimestampMs = if (isConnected) timeProvider() else null
+        )
     }
 }
 
@@ -66,5 +68,5 @@ object BleDiagnosticsStore {
 
     fun onChecksumFail() = tracker.onChecksumFail()
 
-    fun reset() = tracker.reset()
+    fun reset(isConnected: Boolean = false) = tracker.reset(isConnected)
 }

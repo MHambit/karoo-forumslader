@@ -273,7 +273,9 @@ fun MainScreen(sharedUri: Uri? = null) {
         serverUrl = serverUrl,
         logExportStatus = logExportStatus,
         bleDiagnostics = bleDiagnostics,
-        onResetDiagnostics = { BleDiagnosticsStore.reset() },
+        onResetDiagnostics = {
+            BleDiagnosticsStore.reset(isConnected = sensorState is StreamState.Streaming)
+        },
         sharedUri = downloadedFirmwareUri ?: sharedUri,
         dfuState = dfuState,
         isDownloadingLatest = isDownloadingLatest,
