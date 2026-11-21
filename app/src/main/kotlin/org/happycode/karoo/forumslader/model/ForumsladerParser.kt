@@ -8,7 +8,10 @@ import org.happycode.karoo.forumslader.domain.ChargeState
 import org.happycode.karoo.forumslader.domain.ForumsladerMetrics
 import org.happycode.karoo.forumslader.domain.estimation.BatteryEstimator
 
-class ForumsladerParser(private val config: ForumsladerConfig? = null) {
+class ForumsladerParser(
+    private val config: ForumsladerConfig? = null,
+    private val onChecksumResult: ((Boolean) -> Unit)? = null,
+) {
 
     companion object {
         private const val TAG = "FL_Parser"
@@ -238,11 +241,16 @@ class ForumsladerParser(private val config: ForumsladerConfig? = null) {
                     calculatedParity = calculatedParity xor char.code
                 }
                 val expectedParity = checksumString.toIntOrNull(16)
-                if (expectedParity != null && calculatedParity != expectedParity) {
-                    Log.w(TAG, "Checksum mismatch for ${dataString.split(",").getOrNull(0)}: " +
-                            "expected=$checksumString calculated=${calculatedParity.toString(16).uppercase()}")
+                if (expectedParity == null || calculatedParity != expectedParity) {
+                    Log.w(
+                        TAG,
+                        "Checksum mismatch for ${dataString.split(",").getOrNull(0)}: " +
+                            "expected=$checksumString calculated=${calculatedParity.toString(16).uppercase()}"
+                    )
+                    onChecksumResult?.invoke(false)
                     return false
                 }
+                onChecksumResult?.invoke(true)
             }
 
             val tokens = dataString.split(",")

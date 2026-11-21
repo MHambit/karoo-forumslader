@@ -96,6 +96,7 @@ class ForumsladerExtension(
             ForumsladerDataType(extension, DataFieldId.ODOMETER, DataType.Type.DISTANCE),
             ForumsladerDataType(extension, DataFieldId.DAY_DISTANCE, DataType.Type.DISTANCE),
             ForumsladerDataType(extension, DataFieldId.TOUR_DISTANCE, DataType.Type.DISTANCE),
+            BleDiagnosticGraphicalDataType(extension, DataFieldId.BLE_DIAGNOSTIC),
         )
     }
 

@@ -155,4 +155,15 @@
     <string name="ride_summary_notification_message">%1$.1f Wh • Ø %2$.1f W (Peak %3$.1f W)</string>
     <string name="ride_summary_notification_subtext_with_battery">Laden %1$dm • Akku %2$+d%%</string>
     <string name="ride_summary_notification_subtext_no_battery">Laden %1$dm</string>
+    <string name="datafield_ble_diagnostic">BLE-Diagnose</string>
+    <string name="datafield_ble_diagnostic_desc">BLE-Verbindungsstabilität, Prüfsummen-Datenqualität und Trennungsrate</string>
+
+    <string name="ble_diagnostics_title">BLE-Stabilität</string>
+    <string name="ble_diagnostics_stability">Stabilitätsindex</string>
+    <string name="ble_diagnostics_data_quality">Datenqualität</string>
+    <string name="ble_diagnostics_disconnect_rate">Trennungsrate</string>
+    <string name="ble_diagnostics_unexpected_disconnects">Unerwartete Trennungen</string>
+    <string name="ble_diagnostics_uptime">Überwachungsdauer</string>
+    <string name="ble_diagnostics_reset">Diagnose zurücksetzen</string>
+    <string name="ble_diagnostics_not_connected">Noch nicht verbunden</string>
 </resources>

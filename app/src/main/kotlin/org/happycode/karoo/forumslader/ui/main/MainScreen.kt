@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -66,13 +68,16 @@ import org.happycode.karoo.forumslader.adapters.ForumsladerDataFieldsAdapter.Dat
 import org.happycode.karoo.forumslader.adapters.network.CoroutineLogServer
 import org.happycode.karoo.forumslader.adapters.network.FirmwareDownloader
 import org.happycode.karoo.forumslader.adapters.storage.PublicStorageAdapter
+import org.happycode.karoo.forumslader.application.diagnostics.BleDiagnosticsStore
 import org.happycode.karoo.forumslader.application.estimation.BatteryEstimateStore
 import org.happycode.karoo.forumslader.application.CsvLoggerProvider
 import org.happycode.karoo.forumslader.application.ForumsladerStateStore
 import org.happycode.karoo.forumslader.application.LogServerGateway
 import org.happycode.karoo.forumslader.application.LogcatDumper
 import org.happycode.karoo.forumslader.application.PublicStorageGateway
+import org.happycode.karoo.forumslader.domain.diagnostics.BleConnectionDiagnostics
 import org.happycode.karoo.forumslader.domain.estimation.BatteryEstimate
+import org.happycode.karoo.forumslader.ui.main.components.BleDiagnosticsCard
 import org.happycode.karoo.forumslader.domain.CommandBus
 import org.happycode.karoo.forumslader.domain.DfuState
 import org.happycode.karoo.forumslader.domain.ForumsladerCommand
@@ -238,6 +243,7 @@ fun MainScreen(sharedUri: Uri? = null) {
 
     val isServerRunning by serverGateway.isRunning.collectAsState()
     val serverUrl by serverGateway.serverUrl.collectAsState()
+    val bleDiagnostics by BleDiagnosticsStore.diagnosticsFlow.collectAsState()
     val downloadCompleteMessage = stringResource(R.string.status_download_complete)
     val downloadFailedFormat = stringResource(R.string.status_download_failed)
 
@@ -267,6 +273,8 @@ fun MainScreen(sharedUri: Uri? = null) {
         isServerRunning = isServerRunning,
         serverUrl = serverUrl,
         logExportStatus = logExportStatus,
+        bleDiagnostics = bleDiagnostics,
+        onResetDiagnostics = { BleDiagnosticsStore.reset() },
         sharedUri = downloadedFirmwareUri ?: sharedUri,
         dfuState = dfuState,
         isDownloadingLatest = isDownloadingLatest,
@@ -301,6 +309,7 @@ fun MainScreen(sharedUri: Uri? = null) {
                 putString(KEY_LOCKED_MAC_ADDRESS, null)
                 remove(KEY_FULL_CHARGE_CAPACITY_MAH)
             }
+            BleDiagnosticsStore.reset()
         },
         onBatteryLowThresholdChange = {
             prefs.edit { putInt(KEY_BATTERY_LOW_THRESHOLD, it) }
@@ -377,6 +386,7 @@ fun MainScreenContent(
     isServerRunning: Boolean = false,
     serverUrl: String? = null,
     logExportStatus: String? = null,
+    bleDiagnostics: BleConnectionDiagnostics = BleConnectionDiagnostics(),
     sharedUri: Uri? = null,
     dfuState: DfuState = DfuState.Idle,
     isDownloadingLatest: Boolean = false,
@@ -385,6 +395,7 @@ fun MainScreenContent(
     onDownloadLatest: () -> Unit = {},
     onCancelUpdate: () -> Unit = {},
     onReset: () -> Unit = {},
+    onResetDiagnostics: () -> Unit = {},
     onConfigUpdate: (Int, Int) -> Unit,
     onForgetDevice: () -> Unit,
     onBatteryLowThresholdChange: (Int) -> Unit,
@@ -466,23 +477,27 @@ fun MainScreenContent(
                                 onReset = onReset
                             )
                         } else {
-                            LogExportCard(
+                            DiagnosticsPage(
+                                bleDiagnostics = bleDiagnostics,
                                 csvRowCount = csvRowCount,
                                 csvFileSize = csvFileSize,
                                 isServerRunning = isServerRunning,
                                 serverUrl = serverUrl,
                                 statusMessage = logExportStatus,
+                                onResetDiagnostics = onResetDiagnostics,
                                 onSaveToUsb = onSaveToUsb,
                                 onToggleServer = onToggleServer,
                                 onClearLogs = onClearLogs
                             )
                         }
-                        6 -> LogExportCard(
+                        6 -> DiagnosticsPage(
+                            bleDiagnostics = bleDiagnostics,
                             csvRowCount = csvRowCount,
                             csvFileSize = csvFileSize,
                             isServerRunning = isServerRunning,
                             serverUrl = serverUrl,
                             statusMessage = logExportStatus,
+                            onResetDiagnostics = onResetDiagnostics,
                             onSaveToUsb = onSaveToUsb,
                             onToggleServer = onToggleServer,
                             onClearLogs = onClearLogs
@@ -512,6 +527,42 @@ fun MainScreenContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DiagnosticsPage(
+    bleDiagnostics: BleConnectionDiagnostics,
+    csvRowCount: Int,
+    csvFileSize: Long,
+    isServerRunning: Boolean,
+    serverUrl: String?,
+    statusMessage: String?,
+    onResetDiagnostics: () -> Unit,
+    onSaveToUsb: () -> Unit,
+    onToggleServer: () -> Unit,
+    onClearLogs: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        BleDiagnosticsCard(
+            diagnostics = bleDiagnostics,
+            onReset = onResetDiagnostics
+        )
+        LogExportCard(
+            csvRowCount = csvRowCount,
+            csvFileSize = csvFileSize,
+            isServerRunning = isServerRunning,
+            serverUrl = serverUrl,
+            statusMessage = statusMessage,
+            onSaveToUsb = onSaveToUsb,
+            onToggleServer = onToggleServer,
+            onClearLogs = onClearLogs
+        )
     }
 }
 

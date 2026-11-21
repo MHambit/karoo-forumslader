@@ -154,4 +154,15 @@
     <string name="ride_summary_notification_message">%1$.1f Wh • Avg %2$.1f W (Peak %3$.1f W)</string>
     <string name="ride_summary_notification_subtext_with_battery">Charging %1$dm • Battery %2$+d%%</string>
     <string name="ride_summary_notification_subtext_no_battery">Charging %1$dm</string>
+    <string name="datafield_ble_diagnostic">BLE Diagnostics</string>
+    <string name="datafield_ble_diagnostic_desc">BLE connection stability, checksum data quality, and disconnect rate</string>
+
+    <string name="ble_diagnostics_title">BLE Stability</string>
+    <string name="ble_diagnostics_stability">Stability Index</string>
+    <string name="ble_diagnostics_data_quality">Data Quality</string>
+    <string name="ble_diagnostics_disconnect_rate">Disconnect Rate</string>
+    <string name="ble_diagnostics_unexpected_disconnects">Unexpected Disconnects</string>
+    <string name="ble_diagnostics_uptime">Monitoring Uptime</string>
+    <string name="ble_diagnostics_reset">Reset Diagnostics</string>
+    <string name="ble_diagnostics_not_connected">Not connected yet</string>
 </resources>
