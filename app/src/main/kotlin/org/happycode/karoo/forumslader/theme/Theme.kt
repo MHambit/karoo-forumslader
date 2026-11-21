@@ -21,11 +21,11 @@ data class ForumsladerCustomColors(
 
 val LocalForumsladerCustomColors = staticCompositionLocalOf {
     ForumsladerCustomColors(
-        statusGood = Color(0xFF2E7D32),
-        statusWarning = Color(0xFFEF6C00),
-        statusDanger = Color(0xFFC62828),
-        accentPower = Color(0xFFD97724),
-        accentDistance = Color(0xFF8A4520)
+        statusGood = Color(0xFF16A34A),
+        statusWarning = Color(0xFFEA580C),
+        statusDanger = Color(0xFFDC2626),
+        accentPower = Color(0xFFD97706),
+        accentDistance = Color(0xFF0284C7)
     )
 }
 
@@ -33,45 +33,46 @@ val MaterialTheme.forumsladerColors: ForumsladerCustomColors
     @Composable
     get() = LocalForumsladerCustomColors.current
 
-// Bombtrack Beyond 2 "Metallic Rootbeer" theme (inspired by #290E05)
+// Crisp Modern Karoo — Pure Monochrome (Stealth) theme
+// Neutral OLED-black / stark-white chrome so only telemetry status carries color.
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF5C2814),
+    primary = Color(0xFF18181B),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFF5D9C8),
-    onPrimaryContainer = Color(0xFF290E05),
-    secondary = Color(0xFF8A4520),
+    primaryContainer = Color(0xFFF4F4F5),
+    onPrimaryContainer = Color(0xFF18181B),
+    secondary = Color(0xFF52525B),
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFFADCC9),
-    onSecondaryContainer = Color(0xFF331405),
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF1E1B1A),
-    surfaceVariant = Color(0xFFF7EFEA),
-    onSurfaceVariant = Color(0xFF52433D),
-    error = Color(0xFFBA1A1A),
-    errorContainer = Color(0xFFFFDAD6),
-    onErrorContainer = Color(0xFF410002),
-    outline = Color(0xFF85736C),
-    outlineVariant = Color(0xFFE5D5CD)
+    secondaryContainer = Color(0xFFE4E4E7),
+    onSecondaryContainer = Color(0xFF18181B),
+    surface = Color(0xFFF2F3F5),
+    onSurface = Color(0xFF09090B),
+    surfaceVariant = Color(0xFFFFFFFF),
+    onSurfaceVariant = Color(0xFF52525B),
+    error = Color(0xFFDC2626),
+    errorContainer = Color(0xFFFEE2E2),
+    onErrorContainer = Color(0xFF7F1D1D),
+    outline = Color(0xFF71717A),
+    outlineVariant = Color(0xFFE4E4E7)
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFEAA074),
-    onPrimary = Color(0xFF481D08),
-    primaryContainer = Color(0xFF672F15),
-    onPrimaryContainer = Color(0xFFFADCC9),
-    secondary = Color(0xFFE29868),
-    onSecondary = Color(0xFF431E05),
-    secondaryContainer = Color(0xFF5D2F10),
-    onSecondaryContainer = Color(0xFFFADCC9),
-    surface = Color(0xFF181210),
-    onSurface = Color(0xFFEDE0DB),
-    surfaceVariant = Color(0xFF2A1E1A),
-    onSurfaceVariant = Color(0xFFD7C2B9),
-    error = Color(0xFFFFB4AB),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
-    outline = Color(0xFF9F8C84),
-    outlineVariant = Color(0xFF4D3B35)
+    primary = Color(0xFFE4E4E7),
+    onPrimary = Color(0xFF09090B),
+    primaryContainer = Color(0xFF1F1F23),
+    onPrimaryContainer = Color(0xFFF4F4F5),
+    secondary = Color(0xFFA1A1AA),
+    onSecondary = Color(0xFF09090B),
+    secondaryContainer = Color(0xFF27272A),
+    onSecondaryContainer = Color(0xFFE4E4E7),
+    surface = Color(0xFF000000),
+    onSurface = Color(0xFFFFFFFF),
+    surfaceVariant = Color(0xFF141416),
+    onSurfaceVariant = Color(0xFFA1A1AA),
+    error = Color(0xFFF87171),
+    errorContainer = Color(0xFF7F1D1D),
+    onErrorContainer = Color(0xFFFEE2E2),
+    outline = Color(0xFF71717A),
+    outlineVariant = Color(0xFF27272A)
 )
 
 @Composable
@@ -82,19 +83,19 @@ fun AppTheme(
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     val customColors = if (darkTheme) {
         ForumsladerCustomColors(
-            statusGood = Color(0xFF66BB6A),
-            statusWarning = Color(0xFFFFA726),
-            statusDanger = Color(0xFFEF5350),
-            accentPower = Color(0xFFFFB74D),
-            accentDistance = Color(0xFFEAA074)
+            statusGood = Color(0xFF22C55E),
+            statusWarning = Color(0xFFF59E0B),
+            statusDanger = Color(0xFFEF4444),
+            accentPower = Color(0xFFF59E0B),
+            accentDistance = Color(0xFF38BDF8)
         )
     } else {
         ForumsladerCustomColors(
-            statusGood = Color(0xFF2E7D32),
-            statusWarning = Color(0xFFEF6C00),
-            statusDanger = Color(0xFFC62828),
-            accentPower = Color(0xFFD97724),
-            accentDistance = Color(0xFF8A4520)
+            statusGood = Color(0xFF16A34A),
+            statusWarning = Color(0xFFEA580C),
+            statusDanger = Color(0xFFDC2626),
+            accentPower = Color(0xFFD97706),
+            accentDistance = Color(0xFF0284C7)
         )
     }
 
