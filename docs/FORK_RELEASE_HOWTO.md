@@ -82,6 +82,7 @@ git cherry-pick main..fix/karoo3-ble-stability
 git cherry-pick main..fix/fl6-standby-deadband
 git cherry-pick main..fix/graphical-charge-state
 git cherry-pick main..ci/rename-release-apk
+git cherry-pick main..ci/add-lint-and-translation-checks
 git cherry-pick main..feat/dynamic-battery-capacity
 git cherry-pick main..docs/slim-agents-and-coding-standards
 
