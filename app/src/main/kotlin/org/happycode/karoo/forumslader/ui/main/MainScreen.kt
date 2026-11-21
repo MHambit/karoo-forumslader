@@ -15,9 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -413,7 +411,7 @@ fun MainScreenContent(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
         val showFirmware = versionKey != ForumsladerVersion.V5.key
-        val pageCount = if (showFirmware) 7 else 6
+        val pageCount = if (showFirmware) 8 else 7
         val pagerState = rememberPagerState(pageCount = { pageCount })
 
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -479,27 +477,34 @@ fun MainScreenContent(
                                 onReset = onReset
                             )
                         } else {
-                            DiagnosticsPage(
-                                bleDiagnostics = bleDiagnostics,
+                            BleDiagnosticsCard(
+                                diagnostics = bleDiagnostics,
+                                onReset = onResetDiagnostics
+                            )
+                        }
+                        6 -> if (showFirmware) {
+                            BleDiagnosticsCard(
+                                diagnostics = bleDiagnostics,
+                                onReset = onResetDiagnostics
+                            )
+                        } else {
+                            LogExportCard(
                                 csvRowCount = csvRowCount,
                                 csvFileSize = csvFileSize,
                                 isServerRunning = isServerRunning,
                                 serverUrl = serverUrl,
                                 statusMessage = logExportStatus,
-                                onResetDiagnostics = onResetDiagnostics,
                                 onSaveToUsb = onSaveToUsb,
                                 onToggleServer = onToggleServer,
                                 onClearLogs = onClearLogs
                             )
                         }
-                        6 -> DiagnosticsPage(
-                            bleDiagnostics = bleDiagnostics,
+                        7 -> LogExportCard(
                             csvRowCount = csvRowCount,
                             csvFileSize = csvFileSize,
                             isServerRunning = isServerRunning,
                             serverUrl = serverUrl,
                             statusMessage = logExportStatus,
-                            onResetDiagnostics = onResetDiagnostics,
                             onSaveToUsb = onSaveToUsb,
                             onToggleServer = onToggleServer,
                             onClearLogs = onClearLogs
@@ -529,42 +534,6 @@ fun MainScreenContent(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun DiagnosticsPage(
-    bleDiagnostics: BleConnectionDiagnostics,
-    csvRowCount: Int,
-    csvFileSize: Long,
-    isServerRunning: Boolean,
-    serverUrl: String?,
-    statusMessage: String?,
-    onResetDiagnostics: () -> Unit,
-    onSaveToUsb: () -> Unit,
-    onToggleServer: () -> Unit,
-    onClearLogs: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        BleDiagnosticsCard(
-            diagnostics = bleDiagnostics,
-            onReset = onResetDiagnostics
-        )
-        LogExportCard(
-            csvRowCount = csvRowCount,
-            csvFileSize = csvFileSize,
-            isServerRunning = isServerRunning,
-            serverUrl = serverUrl,
-            statusMessage = statusMessage,
-            onSaveToUsb = onSaveToUsb,
-            onToggleServer = onToggleServer,
-            onClearLogs = onClearLogs
-        )
     }
 }
 

@@ -145,7 +145,7 @@ class MainScreenTest {
     }
 
     private fun swipeToDiagnosticsPage() {
-        repeat(6) { composeTestRule.onRoot().performTouchInput { swipeLeft() } }
+        repeat(7) { composeTestRule.onRoot().performTouchInput { swipeLeft() } }
     }
 
     @Test

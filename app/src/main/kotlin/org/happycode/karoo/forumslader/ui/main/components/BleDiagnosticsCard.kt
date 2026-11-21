@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BluetoothConnected
 import androidx.compose.material.icons.filled.Refresh
@@ -22,11 +23,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.happycode.karoo.forumslader.R
 import org.happycode.karoo.forumslader.domain.diagnostics.BleConnectionDiagnostics
+import org.happycode.karoo.forumslader.theme.forumsladerColors
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -76,9 +80,16 @@ fun BleDiagnosticsCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
+                val stabilityPct = diagnostics.stabilityPct(nowMs).roundToInt()
+                val stabilityColor = when {
+                    stabilityPct >= 80 -> MaterialTheme.forumsladerColors.statusGood
+                    stabilityPct >= 50 -> MaterialTheme.forumsladerColors.statusWarning
+                    else -> MaterialTheme.forumsladerColors.statusDanger
+                }
                 DiagnosticRow(
                     label = stringResource(R.string.ble_diagnostics_stability),
-                    value = "${diagnostics.stabilityPct(nowMs).roundToInt()}%"
+                    value = "$stabilityPct%",
+                    valueColor = stabilityColor
                 )
                 DiagnosticRow(
                     label = stringResource(R.string.ble_diagnostics_data_quality),
@@ -100,6 +111,7 @@ fun BleDiagnosticsCard(
 
             OutlinedButton(
                 onClick = onReset,
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
@@ -108,14 +120,22 @@ fun BleDiagnosticsCard(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(text = stringResource(R.string.ble_diagnostics_reset))
+                Text(
+                    text = stringResource(R.string.ble_diagnostics_reset),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
 }
 
 @Composable
-private fun DiagnosticRow(label: String, value: String) {
+private fun DiagnosticRow(
+    label: String,
+    value: String,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -130,7 +150,7 @@ private fun DiagnosticRow(label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = valueColor
         )
     }
 }
