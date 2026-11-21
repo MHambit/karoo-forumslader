@@ -127,6 +127,8 @@ private fun BatteryChargeSection(
             progress = { (levelPct / 100f).coerceIn(0f, 1f) },
             color = indicatorColor,
             trackColor = MaterialTheme.colorScheme.surface,
+            gapSize = 0.dp,
+            drawStopIndicator = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
