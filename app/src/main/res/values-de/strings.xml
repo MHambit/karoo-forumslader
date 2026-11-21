@@ -49,7 +49,7 @@
     <string name="battery_range_standby">Standby</string>
     <string name="battery_range_charging">Ladevorgang — Reichweite unbegrenzt</string>
     <string name="battery_range_not_enough_data">Zu wenig Daten…</string>
-    <string name="battery_range_remaining">~%1$d km verbleibend</string>
+    <string name="battery_range_remaining">~%1$d km</string>
     <string name="battery_range_rate">%1$.1f%%/km</string>
     <string name="battery_range_sufficient">Ausreichend für Route</string>
     <string name="battery_range_insufficient">Akku könnte vorzeitig leer sein</string>
@@ -63,7 +63,7 @@
     <string name="action_decrease">Verringern</string>
     <string name="action_increase">Erhöhen</string>
 
-    <string name="missing_streams_warning">Einige Datenfelder werden von dem gekoppelten Gerät nicht unterstützt. Bitte löschen und koppeln Sie Ihren Forumslader in den Karoo-Sensoreinstellungen neu, um die Fähigkeiten zu aktualisieren.</string>
+    <string name="missing_streams_warning">Forumslader neu koppeln</string>
 
     <string name="status_active">Aktiv</string>
     <string name="status_inactive">Inaktiv</string>

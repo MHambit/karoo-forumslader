@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,22 +39,26 @@ fun StatusCard(connected: Boolean, sensorState: StreamState) {
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(id = R.string.extension_name),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
                         .background(
                             color = if (connected) {
@@ -65,7 +68,7 @@ fun StatusCard(connected: Boolean, sensorState: StreamState) {
                             },
                             shape = RoundedCornerShape(12.dp)
                         )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
                     Icon(
                         imageVector = if (connected) Icons.Default.BluetoothConnected else Icons.Default.BluetoothDisabled,
@@ -77,12 +80,12 @@ fun StatusCard(connected: Boolean, sensorState: StreamState) {
                         text = if (connected) stringResource(R.string.status_active) else stringResource(R.string.status_inactive),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (connected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.outline
+                        color = if (connected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.outline,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
-
-            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -91,7 +94,7 @@ fun StatusCard(connected: Boolean, sensorState: StreamState) {
             ) {
                 Text(
                     text = stringResource(R.string.forumslader_device_label),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 val (statusIcon, statusColor, statusResId) = when (sensorState) {
                     is StreamState.Streaming -> Triple(
@@ -121,7 +124,8 @@ fun StatusCard(connected: Boolean, sensorState: StreamState) {
                 Icon(
                     imageVector = statusIcon,
                     contentDescription = stringResource(statusResId),
-                    tint = statusColor
+                    tint = statusColor,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }

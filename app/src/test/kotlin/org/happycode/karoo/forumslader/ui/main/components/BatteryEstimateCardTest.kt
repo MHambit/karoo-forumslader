@@ -118,7 +118,7 @@ class BatteryEstimateCardTest {
         composeTestRule.onNodeWithText("Charge Level").assertIsDisplayed()
         composeTestRule.onNodeWithText("80%").assertIsDisplayed()
         composeTestRule.onNodeWithText("Estimated Range").assertIsDisplayed()
-        composeTestRule.onNodeWithText("~65 km remaining").assertIsDisplayed()
+        composeTestRule.onNodeWithText("~65 km").assertIsDisplayed()
         composeTestRule.onNodeWithText("1.2%/km").assertIsDisplayed()
         composeTestRule.onNodeWithText("Sufficient for route").assertIsDisplayed()
     }
@@ -176,7 +176,7 @@ class BatteryEstimateCardTest {
 
         // then
         composeTestRule.onNodeWithText("15%").assertIsDisplayed()
-        composeTestRule.onNodeWithText("~8 km remaining").assertIsDisplayed()
+        composeTestRule.onNodeWithText("~8 km").assertIsDisplayed()
         composeTestRule.onNodeWithText("Battery may run out early").assertIsDisplayed()
     }
 

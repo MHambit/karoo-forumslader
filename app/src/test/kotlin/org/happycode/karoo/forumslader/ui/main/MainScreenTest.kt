@@ -173,7 +173,7 @@ class MainScreenTest {
 
         // then
         composeTestRule.onNodeWithText("0.5%/km").assertIsDisplayed()
-        composeTestRule.onNodeWithText("~170 km remaining").assertIsDisplayed()
+        composeTestRule.onNodeWithText("~170 km").assertIsDisplayed()
         composeTestRule.onNodeWithText("Sufficient for route", substring = true).assertIsDisplayed()
     }
 
@@ -258,7 +258,7 @@ class MainScreenTest {
         showMainScreen(estimate = estimate)
 
         // then
-        composeTestRule.onNodeWithText("~100 km remaining").assertIsDisplayed()
+        composeTestRule.onNodeWithText("~100 km").assertIsDisplayed()
     }
 
     @Test
@@ -497,7 +497,7 @@ class MainScreenTest {
         )
 
         // then
-        composeTestRule.onNodeWithText("Some data fields are unsupported", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Re-pair Forumslader sensor", substring = true).assertIsDisplayed()
     }
 
     @Test

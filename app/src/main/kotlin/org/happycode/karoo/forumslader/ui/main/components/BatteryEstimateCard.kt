@@ -48,16 +48,14 @@ fun BatteryEstimateCard(
     val level = batteryLevel?.toInt() ?: estimate?.remainingCapacityPct
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             BatteryCardHeader()
 
@@ -229,9 +227,9 @@ private fun RouteSufficiencyBanner(isSufficient: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp)
+            .padding(top = 2.dp)
             .background(containerColor, shape = MaterialTheme.shapes.small)
-            .padding(horizontal = 8.dp, vertical = 6.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -246,9 +244,10 @@ private fun RouteSufficiencyBanner(isSufficient: Boolean) {
                 if (isSufficient) R.string.battery_range_sufficient
                 else R.string.battery_range_insufficient
             ),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = contentColor
+            color = contentColor,
+            maxLines = 1
         )
     }
 }
@@ -278,7 +277,6 @@ private fun BatteryPackHealthFooter(estimate: BatteryEstimate) {
     Text(
         text = summaryText,
         style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 2.dp)
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
