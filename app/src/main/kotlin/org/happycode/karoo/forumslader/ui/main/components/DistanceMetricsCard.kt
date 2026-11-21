@@ -2,6 +2,7 @@ package org.happycode.karoo.forumslader.ui.main.components
 
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -80,6 +81,7 @@ fun DistanceMetricsCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
