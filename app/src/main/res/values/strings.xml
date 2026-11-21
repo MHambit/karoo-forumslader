@@ -127,7 +127,8 @@
 
     <!-- Firmware Update -->
     <string name="firmware_update_title">Firmware Update (V6)</string>
-    <string name="action_download_latest">Download Latest (Requires Internet)</string>
+    <string name="action_download_latest">Download Latest</string>
+    <string name="label_requires_internet">Requires Internet</string>
     <string name="label_select_local_file">Or select local .hex file:</string>
     <string name="label_selected_file">File: %1$s</string>
     <string name="action_browse">Browse</string>

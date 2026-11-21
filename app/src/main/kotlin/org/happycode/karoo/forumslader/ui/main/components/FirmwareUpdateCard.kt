@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,9 +39,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.happycode.karoo.forumslader.R
 import org.happycode.karoo.forumslader.domain.DfuState
+import org.happycode.karoo.forumslader.theme.forumsladerColors
 
 @Composable
 fun FirmwareUpdateCard(
@@ -96,53 +100,58 @@ fun FirmwareUpdateCard(
                 )
             }
 
-            Button(
-                onClick = onDownloadLatest,
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = canStartUpdate && !isDownloadingLatest
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (isDownloadingLatest) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.CloudDownload,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                Button(
+                    onClick = onDownloadLatest,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = canStartUpdate && !isDownloadingLatest
+                ) {
+                    if (isDownloadingLatest) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.CloudDownload,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.action_download_latest),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.action_download_latest))
+                Text(
+                    text = stringResource(R.string.label_requires_internet),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                    Text(
-                        text = stringResource(R.string.label_select_local_file),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    if (selectedUri != null) {
-                        Text(
-                            text = stringResource(
-                                R.string.label_selected_file,
-                                selectedUri?.lastPathSegment ?: ""
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+                Text(
+                    text = stringResource(R.string.label_select_local_file),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 OutlinedButton(
                     onClick = { filePickerLauncher.launch(arrayOf("application/octet-stream", "*/*")) },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = canStartUpdate
                 ) {
                     Icon(
@@ -150,8 +159,20 @@ fun FirmwareUpdateCard(
                         contentDescription = null,
                         modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(text = stringResource(R.string.action_browse))
+                }
+                if (selectedUri != null) {
+                    Text(
+                        text = stringResource(
+                            R.string.label_selected_file,
+                            selectedUri?.lastPathSegment ?: ""
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
 
@@ -187,11 +208,12 @@ fun FirmwareUpdateCard(
                 is DfuState.Success -> Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = stringResource(R.string.status_dfu_success),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.forumsladerColors.statusGood,
                         fontWeight = FontWeight.Bold
                     )
                     Button(
                         onClick = onReset,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(text = stringResource(R.string.action_done))
@@ -217,6 +239,7 @@ fun FirmwareUpdateCard(
 private fun StartUpdateButton(enabled: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled
     ) {
@@ -234,6 +257,11 @@ private fun StartUpdateButton(enabled: Boolean, onClick: () -> Unit) {
 private fun CancelUpdateButton(onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.error
+        ),
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(text = stringResource(R.string.action_cancel))

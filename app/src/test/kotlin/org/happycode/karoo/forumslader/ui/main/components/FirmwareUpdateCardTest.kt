@@ -36,7 +36,7 @@ class FirmwareUpdateCardTest {
         }
 
         // then
-        composeTestRule.onNodeWithText("Download Latest (Requires Internet)").assertExists()
+        composeTestRule.onNodeWithText("Download Latest").assertExists()
         composeTestRule.onNodeWithText("Browse").assertExists()
     }
 
@@ -93,7 +93,7 @@ class FirmwareUpdateCardTest {
         // then
         composeTestRule.onNodeWithText("Start Update").assertDoesNotExist()
         composeTestRule.onNodeWithText("Browse").assertIsNotEnabled()
-        composeTestRule.onNodeWithText("Download Latest (Requires Internet)").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Download Latest").assertIsNotEnabled()
     }
 
     @Test
@@ -236,7 +236,7 @@ class FirmwareUpdateCardTest {
         }
 
         composeTestRule.onNodeWithText("Firmware-Update (V6)").assertExists()
-        composeTestRule.onNodeWithText("Neueste herunterladen (Internet erforderlich)").assertExists()
+        composeTestRule.onNodeWithText("Neueste laden").assertExists()
         composeTestRule.onNodeWithText("Durchsuchen").assertExists()
     }
 
@@ -255,6 +255,6 @@ class FirmwareUpdateCardTest {
 
         // then
         composeTestRule.onNode(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)).assertExists()
-        composeTestRule.onNodeWithText("Download Latest (Requires Internet)").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Download Latest").assertIsNotEnabled()
     }
 }

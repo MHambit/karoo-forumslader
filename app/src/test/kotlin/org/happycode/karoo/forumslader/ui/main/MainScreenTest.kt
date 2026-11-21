@@ -626,7 +626,7 @@ class MainScreenTest {
         swipeToFirmwarePage()
 
         // when
-        composeTestRule.onNodeWithText("Download Latest (Requires Internet)").performClick()
+        composeTestRule.onNodeWithText("Download Latest").performClick()
 
         // then
         downloaded shouldBe true
@@ -670,7 +670,7 @@ class MainScreenTest {
         swipeToFirmwarePage()
 
         // when
-        composeTestRule.onNodeWithText("Download Latest (Requires Internet)").performClick()
+        composeTestRule.onNodeWithText("Download Latest").performClick()
 
         // then
         composeTestRule.onNodeWithText("Currently not implemented, waiting for further information…").assertIsDisplayed()
