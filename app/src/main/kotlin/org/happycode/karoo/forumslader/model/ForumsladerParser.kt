@@ -325,7 +325,10 @@ class ForumsladerParser(private val config: ForumsladerConfig? = null) {
                                 ?.takeIf { it >= 0 }
                                 ?.let { cycleCount = it }
                             if (DEBUG_SENTENCE_PARSING) {
-                                Log.d(TAG, "FLC: battery level=$batteryLevelPercentage% capacity=${fullChargeCapacityMah}mAh cycles=$cycleCount")
+                                Log.d(
+                                    TAG,
+                                    "FLC: battery level=$batteryLevelPercentage% capacity=${fullChargeCapacityMah}mAh cycles=$cycleCount"
+                                )
                             }
                         }
 
