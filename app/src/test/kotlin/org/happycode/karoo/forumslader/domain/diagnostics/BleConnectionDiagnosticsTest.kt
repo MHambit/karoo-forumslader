@@ -32,13 +32,13 @@ class BleConnectionDiagnosticsTest : FunSpec({
 
         // when / then
         diagnostics.disconnectsPerHour(nowMs) shouldBe (1.0f plusOrMinus 0.001f)
-        diagnostics.stabilityPct(nowMs) shouldBe (0.0f plusOrMinus 0.001f)
+        diagnostics.stabilityPct(nowMs) shouldBe (50.0f plusOrMinus 0.001f)
         diagnostics.dataQualityPct shouldBe (99.0f plusOrMinus 0.001f)
-        diagnostics.formatCompact(nowMs) shouldBe "S:0% Q:99% D:1.0/h"
+        diagnostics.formatCompact(nowMs) shouldBe "S:50% Q:99% D:1.0/h"
     }
 
     test("should calculate stability index and disconnect rate accurately over multi-hour session") {
-        // given: 4 hours uptime, 1 unexpected disconnect => 0.25/h => 75% stability
+        // given: 4 hours uptime, 1 unexpected disconnect => 0.25/h => 80% stability
         val connectMs = 0L
         val nowMs = 4 * 3_600_000L
         val diagnostics = BleConnectionDiagnostics(
@@ -51,13 +51,13 @@ class BleConnectionDiagnosticsTest : FunSpec({
         // when / then
         diagnostics.uptimeHours(nowMs) shouldBe (4.0f plusOrMinus 0.001f)
         diagnostics.disconnectsPerHour(nowMs) shouldBe (0.25f plusOrMinus 0.001f)
-        diagnostics.stabilityPct(nowMs) shouldBe (75.0f plusOrMinus 0.001f)
+        diagnostics.stabilityPct(nowMs) shouldBe (80.0f plusOrMinus 0.001f)
         diagnostics.dataQualityPct shouldBe (99.0f plusOrMinus 0.001f)
-        diagnostics.formatCompact(nowMs) shouldBe "S:75% Q:99% D:0.3/h"
+        diagnostics.formatCompact(nowMs) shouldBe "S:80% Q:99% D:0.3/h"
     }
 
-    test("should clamp stability index to 0% when disconnect rate exceeds 1 per hour") {
-        // given: 2 hours uptime, 5 unexpected disconnects => 2.5/h => clamped to 0%
+    test("should decay stability index smoothly when disconnect rate exceeds 1 per hour") {
+        // given: 2 hours uptime, 5 unexpected disconnects => 2.5/h => 100 / 3.5 ≈ 28.57%
         val diagnostics = BleConnectionDiagnostics(
             unexpectedDisconnectCount = 5,
             connectTimestampMs = 0L,
@@ -65,7 +65,7 @@ class BleConnectionDiagnosticsTest : FunSpec({
 
         // when / then
         diagnostics.disconnectsPerHour(nowMs = 2 * 3_600_000L) shouldBe (2.5f plusOrMinus 0.001f)
-        diagnostics.stabilityPct(nowMs = 2 * 3_600_000L) shouldBe 0f
+        diagnostics.stabilityPct(nowMs = 2 * 3_600_000L) shouldBe (28.571f plusOrMinus 0.01f)
     }
 
     test("should clamp negative elapsed time to zero") {

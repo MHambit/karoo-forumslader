@@ -82,7 +82,7 @@ class BleDiagnosticGraphicalDataTypeTest {
         // then
         val inflated = views.apply(context, null)
         val textView = inflated.findViewById<TextView>(R.id.ble_diagnostic_text)
-        assertEquals("S:75% Q:99% D:0.3/h", textView.text.toString())
+        assertEquals("S:80% Q:99% D:0.3/h", textView.text.toString())
     }
 
     @Test

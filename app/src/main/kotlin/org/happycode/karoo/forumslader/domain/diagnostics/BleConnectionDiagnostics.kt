@@ -32,7 +32,7 @@ data class BleConnectionDiagnostics(
         }
 
     fun stabilityPct(nowMs: Long): Float =
-        maxOf(0f, (1f - disconnectsPerHour(nowMs)) * 100f)
+        100f / (1f + disconnectsPerHour(nowMs))
 
     fun formatCompact(nowMs: Long): String {
         if (connectTimestampMs == null) return IDLE_PLACEHOLDER

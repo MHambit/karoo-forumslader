@@ -57,7 +57,7 @@ class BleDiagnosticsCardTest {
             }
         }
 
-        composeTestRule.onNodeWithText("75%").assertIsDisplayed()
+        composeTestRule.onNodeWithText("80%").assertIsDisplayed()
         composeTestRule.onNodeWithText("99%").assertIsDisplayed()
         composeTestRule.onNodeWithText("0.3/h").assertIsDisplayed()
         composeTestRule.onNodeWithText("1").assertIsDisplayed()

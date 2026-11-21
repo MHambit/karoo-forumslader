@@ -33,7 +33,7 @@ Unexpected disconnects per hour, computed over at least one hour (`unexpectedDis
 _Avoid_: drop rate, reconnect rate
 
 **Stability Index**:
-BLE link reliability percentage derived from the disconnect rate: `max(0%, (1 - disconnectRate) * 100%)`.
+BLE link reliability percentage derived from the disconnect rate: `100% / (1 + disconnectRate)`.
 _Avoid_: connection score, BLE health
 
 **Data Quality**:
