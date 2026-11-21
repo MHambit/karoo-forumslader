@@ -117,5 +117,12 @@
         icon="@drawable/ic_df_distance"
         graphical="false" />
 
+    <DataType
+        typeId="fl_ble_diagnostic"
+        displayName="@string/datafield_ble_diagnostic"
+        description="@string/datafield_ble_diagnostic_desc"
+        icon="@drawable/ic_df_bolt"
+        graphical="true" />
+
 
 </ExtensionInfo>

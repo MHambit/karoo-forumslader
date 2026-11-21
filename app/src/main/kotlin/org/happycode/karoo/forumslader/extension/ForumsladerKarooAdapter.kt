@@ -36,6 +36,7 @@ import org.happycode.karoo.forumslader.adapters.ForumsladerDataFieldsAdapter.Dat
 import org.happycode.karoo.forumslader.application.CsvLogger
 import org.happycode.karoo.forumslader.application.CsvLoggerProvider
 import org.happycode.karoo.forumslader.application.ForumsladerStateStore
+import org.happycode.karoo.forumslader.application.diagnostics.BleDiagnosticsStore
 import org.happycode.karoo.forumslader.application.estimation.BatteryEstimateStore
 import org.happycode.karoo.forumslader.application.estimation.RecordRiderProfileUseCase
 import org.happycode.karoo.forumslader.domain.BatteryLowRule
@@ -107,8 +108,12 @@ class ForumsladerKarooAdapter(
     )
 
     private val config = ForumsladerConfig(context)
-    private val parser = ForumsladerParser(config)
+    private val parser = ForumsladerParser(config) { passed ->
+        if (passed) BleDiagnosticsStore.onChecksumPass() else BleDiagnosticsStore.onChecksumFail()
+    }
     private var currentEmitter: Emitter<DeviceEvent>? = null
+    private var wasConnected = false
+    private var intentionalDisconnect = false
     
     private val protocol = ForumsladerProtocol(bleManager, adapterScope)
 
@@ -234,19 +239,31 @@ class ForumsladerKarooAdapter(
                 bleManager.connectionState.collect { status ->
                     Log.i(TAG, "Connection status changed for $address: $status")
                     currentEmitter?.onNext(OnConnectionStatus(status = status))
-                    if (status == ConnectionStatus.DISCONNECTED) {
-                        csvLogger.flush()
-                        recordRiderProfileUseCase.flush()
-                        protocol.stopParameterRequestLoop()
-                        parser.resetConfigLoaded()
-                        BatteryEstimateStore.clear()
-                        lightLoadDetector.reset()
-                        previousLightState = LightLoadState.IDLE
-                        autoDisabledUsbByLight = false
-                        currentGradientPct = null
-                        totalRouteDistanceMeters = null
-                        routeClimbs = emptyList()
-                        batteryEstimator.onUpcomingClimbs(emptyList())
+                    when (status) {
+                        ConnectionStatus.CONNECTED -> {
+                            wasConnected = true
+                            intentionalDisconnect = false
+                            BleDiagnosticsStore.onConnected()
+                        }
+                        ConnectionStatus.DISCONNECTED -> {
+                            if (wasConnected && !intentionalDisconnect) {
+                                BleDiagnosticsStore.onUnexpectedDisconnect()
+                            }
+                            wasConnected = false
+                            csvLogger.flush()
+                            recordRiderProfileUseCase.flush()
+                            protocol.stopParameterRequestLoop()
+                            parser.resetConfigLoaded()
+                            BatteryEstimateStore.clear()
+                            lightLoadDetector.reset()
+                            previousLightState = LightLoadState.IDLE
+                            autoDisabledUsbByLight = false
+                            currentGradientPct = null
+                            totalRouteDistanceMeters = null
+                            routeClimbs = emptyList()
+                            batteryEstimator.onUpcomingClimbs(emptyList())
+                        }
+                        else -> Unit
                     }
                 }
             }
@@ -268,6 +285,9 @@ class ForumsladerKarooAdapter(
                     val em = currentEmitter ?: return@collect
                     parser.processIncomingBytes(data)?.let { metrics ->
                         if (config.lockedMacAddress != address) {
+                            if (config.lockedMacAddress != null) {
+                                BleDiagnosticsStore.reset()
+                            }
                             Log.i(
                                 "FL_BLE",
                                 "Locking MAC address to $address after first successful data reception"
@@ -547,6 +567,7 @@ class ForumsladerKarooAdapter(
         val cmdBytes = $$"$$$payload*$$checksum\r\n".toByteArray(Charsets.US_ASCII)
         bleManager.writeCommand(cmdBytes)
         if (command is ForumsladerCommand.EnterDfuMode) {
+            intentionalDisconnect = true
             protocol.stopParameterRequestLoop()
             adapterScope.launch {
                 bleManager.connectionState

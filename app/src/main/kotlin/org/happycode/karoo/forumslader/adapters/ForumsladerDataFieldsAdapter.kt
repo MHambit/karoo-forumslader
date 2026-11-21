@@ -23,6 +23,7 @@ class ForumsladerDataFieldsAdapter(private val context: Context) {
         const val ODOMETER = "fl_odometer"
         const val DAY_DISTANCE = "fl_day_distance"
         const val TOUR_DISTANCE = "fl_tour_distance"
+        const val BLE_DIAGNOSTIC = "fl_ble_diagnostic"
 
         // Subfield keys for multi-field DataPoint (e.g. BATTERY_LEVEL)
         const val FIELD_BATTERY_LEVEL = "battery_level"

@@ -173,11 +173,13 @@ class ForumsladerExtensionTest : ShouldSpec({
         val types = extension.types
 
         // then
-        types.size shouldBe 16
+        types.size shouldBe 17
         val typeIds = types.map { it.typeId }
         typeIds shouldContain DataFieldId.BATTERY_LEVEL
         typeIds shouldContain DataFieldId.SPEED
+        typeIds shouldContain DataFieldId.BLE_DIAGNOSTIC
         (types.first { it.typeId == DataFieldId.BATTERY_LEVEL } is ForumsladerGraphicalDataType) shouldBe true
+        (types.first { it.typeId == DataFieldId.BLE_DIAGNOSTIC } is BleDiagnosticGraphicalDataType) shouldBe true
     }
 
     should("handle missing permission when start scan is called") {
