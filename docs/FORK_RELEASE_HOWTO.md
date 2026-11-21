@@ -72,30 +72,32 @@ git push --force-with-lease origin fix/my-change
 
 ## 5. Build & Release on `develop`
 
-Because upstream squash-merges PRs, rebuild `develop` cleanly from `main` by merging your active unmerged branches **one by one** (sequential merges avoid Git's octopus-merge failure when two branches touch the same file):
+Because upstream squash-merges PRs, rebuild `develop` cleanly from `main` by cherry-picking each active unmerged branch's commits (`main..<branch>`). This keeps `develop` 100% linear (no merge commits in `git log` or release notes) while leaving every PR branch cleanly based on `main`:
 
 ```bash
 git checkout -B develop main
 
-# Merge each still-unmerged PR branch sequentially
-git merge --no-edit fix/karoo3-ble-stability
-git merge --no-edit fix/fl6-standby-deadband
-git merge --no-edit fix/graphical-charge-state
-git merge --no-edit ci/rename-release-apk
+# Cherry-pick each still-unmerged PR branch sequentially
+git cherry-pick main..fix/karoo3-ble-stability
+git cherry-pick main..fix/fl6-standby-deadband
+git cherry-pick main..fix/graphical-charge-state
+git cherry-pick main..ci/rename-release-apk
+git cherry-pick main..feat/dynamic-battery-capacity
+git cherry-pick main..docs/slim-agents-and-coding-standards
 
-# Merge the fork-only CI workflow branch
-git merge --no-edit fork/ci-develop-release
+# Cherry-pick the fork-only CI workflow branch
+git cherry-pick main..fork/ci-develop-release
 
 # Push to trigger GitHub Actions release
 git push -u --force-with-lease origin develop
 ```
 
-If a merge reports a conflict (for example, two PR branches touching the same line in `README.md`), resolve the conflict, then run:
+If a cherry-pick reports a conflict (for example, two PR branches touching the same line in `README.md`), resolve the conflict, then run:
 ```bash
 git add <conflicted-file>
-git commit --no-edit
+git cherry-pick --continue
 ```
-and continue merging the remaining branches.
+*(Tip: `git config rerere.enabled true` remembers conflict resolutions across future rebuilds.)*
 
 ### What happens automatically on push to `develop`
 `.github/workflows/develop-release.yml` mirrors the production release pipeline for `develop` (and can also be triggered manually via **Actions → Develop Release (Fork) → Run workflow**):
@@ -132,5 +134,4 @@ git push origin --delete fix/fl6-standby-deadband
 - **Never commit directly to `main`** — keeps `upstream/main` syncing fast-forward only.
 - **Never merge `develop` into `main`** — prevents unmerged or fork-only commits from leaking into `main`.
 - **Never branch an upstream PR off `develop`** — always branch off `main`.
-- **Never pass multiple branches to a single `git merge`** when conflicts are possible — merge one branch at a time.
 - **Always use `--force-with-lease`** instead of `--force` when pushing rebased or rebuilt branches.
