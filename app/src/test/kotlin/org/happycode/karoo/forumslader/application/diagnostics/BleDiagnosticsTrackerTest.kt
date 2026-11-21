@@ -47,6 +47,26 @@ class BleDiagnosticsTrackerTest : FunSpec({
         tracker.current.checksumFailCount shouldBe 0
     }
 
+    test("should preserve active session with fresh timestamp when reset while connected") {
+        // given
+        var now = 1_000L
+        val tracker = BleDiagnosticsTracker(timeProvider = { now })
+        tracker.onConnected()
+        tracker.onUnexpectedDisconnect()
+        tracker.onChecksumPass()
+        now = 9_000L
+
+        // when
+        tracker.reset(isConnected = true)
+
+        // then
+        tracker.current.hasConnected shouldBe true
+        tracker.current.connectTimestampMs shouldBe 9_000L
+        tracker.current.unexpectedDisconnectCount shouldBe 0
+        tracker.current.checksumPassCount shouldBe 0
+        tracker.current.checksumFailCount shouldBe 0
+    }
+
     test("should report checksum pass, mismatch, and malformed hex from ForumsladerParser while ignoring unchecksummed sentences") {
         // given
         val tracker = BleDiagnosticsTracker(timeProvider = { 1_000L })
