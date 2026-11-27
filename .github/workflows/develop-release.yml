@@ -104,9 +104,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          ./gradlew :app:assembleRelease -PversionName=${{ env.new_tag }} -PversionCode=${{ github.run_number }}
-          cp app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/karoo-forumslader-${{ env.new_tag }}.apk"
+        run: ./gradlew :app:assembleRelease -PversionName=${{ env.new_tag }} -PversionCode=${{ github.run_number }}
 
       - name: Generate Release Notes
         run: kotlinc -script .github/scripts/generate_release_notes.kts
@@ -120,6 +118,6 @@ jobs:
           body_path: release_notes.md
           draft: false
           prerelease: false
-          files: app/build/outputs/apk/release/karoo-forumslader-${{ env.new_tag }}.apk
+          files: app/build/outputs/apk/release/karoo-forumslader-${{ env.new_tag }}-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
