@@ -85,7 +85,9 @@ jobs:
             patch=$((patch + 1))
           fi
 
-          new_tag="v${major}.${minor}.${patch}-dev.${GITHUB_RUN_NUMBER}"
+          new_version="${major}.${minor}.${patch}-dev.${GITHUB_RUN_NUMBER}"
+          new_tag="v${new_version}"
+          echo "new_version=${new_version}" >> "$GITHUB_ENV"
           echo "new_tag=${new_tag}" >> "$GITHUB_ENV"
           echo "Previous upstream tag: ${prev_tag}"
           echo "New dev version: ${new_tag}"
@@ -118,6 +120,7 @@ jobs:
           body_path: release_notes.md
           draft: false
           prerelease: false
-          files: app/build/outputs/apk/release/karoo-forumslader-${{ env.new_tag }}-release.apk
+          files: app/build/outputs/apk/release/karoo-forumslader-${{ env.new_version }}-release.apk
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
