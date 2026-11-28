@@ -535,7 +535,7 @@ class MainScreenTest {
             CommandBus.commands.first()
         }
 
-        composeTestRule.onNodeWithContentDescription("Reset Day Distance", substring = true).performClick()
+        composeTestRule.onNodeWithContentDescription("Reset Day km", substring = true).performClick()
         composeTestRule.onNodeWithText("OK").performClick()
 
         // then
@@ -559,7 +559,7 @@ class MainScreenTest {
             CommandBus.commands.first()
         }
 
-        composeTestRule.onNodeWithContentDescription("Reset Tour Distance", substring = true).performClick()
+        composeTestRule.onNodeWithContentDescription("Reset Tour km", substring = true).performClick()
         composeTestRule.onNodeWithText("OK").performClick()
 
         // then
