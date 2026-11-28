@@ -37,9 +37,9 @@ import org.happycode.karoo.forumslader.model.ForumsladerBleProfile.SERVICE_UUID_
 import org.happycode.karoo.forumslader.model.ForumsladerBleProfile.SERVICE_UUID_V6
 import org.happycode.karoo.forumslader.model.ForumsladerBleProfile.SERVICE_UUID_V6_ALT
 import org.happycode.karoo.forumslader.model.ForumsladerConfig
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import kotlin.uuid.Uuid
 
 class ForumsladerExtension(
     private val adapterFactory: (Context, String, String?) -> ForumsladerKarooAdapter = { ctx, address, name ->
@@ -52,7 +52,8 @@ class ForumsladerExtension(
             .build()
     },
     private val bluetoothStateFlowFactory: (Context) -> Flow<Boolean> = { it.bluetoothStateFlow() },
-    private val karooSystemFactory: (Context) -> KarooSystemService = { KarooSystemService(it) }
+    private val karooSystemFactory: (Context) -> KarooSystemService = { KarooSystemService(it) },
+    private val scanIdGenerator: () -> String = { Uuid.random().toString() },
 ) : KarooExtension(extension = "karoo-forumslader", version = BuildConfig.VERSION_NAME) {
     private var fitEmitter: Emitter<FitEffect>? = null
     private val devices: ConcurrentMap<String, ForumsladerKarooAdapter> = ConcurrentHashMap()
@@ -207,7 +208,7 @@ class ForumsladerExtension(
         val scanKarooSystem = karooSystemFactory(applicationContext)
         val bluetoothLease = KarooBluetoothLease(
             karooSystem = scanKarooSystem,
-            resourceId = "$extension:scan:${UUID.randomUUID()}"
+            resourceId = "$extension:scan:${scanIdGenerator()}"
         )
         bluetoothLease.acquire()
 
